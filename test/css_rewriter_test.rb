@@ -19,7 +19,7 @@ class CssRewriterTest < Test::Unit::TestCase
       tmp = CloudfrontAssetHost::CssRewriter.rewrite_stylesheet(@stylesheet_path)
       contents = File.read(tmp.path)
       contents.split("\n").each do |line|
-        assert_equal "body { background-image: url(http://assethost.com/d41d8cd98/images/image.png); }", line
+        assert_equal "body { background-image: url(/d41d8cd98/images/image.png); }", line
       end
     end
 
