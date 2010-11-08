@@ -68,31 +68,37 @@ class CloudfrontAssetHostTest < Test::Unit::TestCase
       context "when taking the headers into account" do
 
         should "not support gzip for images" do
-          request = stub(:headers => {'User-Agent' => 'Mozilla/5.0', 'Accept-Encoding' => 'gzip, compress'})
+          request = stub(:headers => {'User-Agent' => 'Mozilla/5.0', 'Accept-Encoding' => 'gzip, compress'}, :ssl? => false)
           source  = "/images/logo.png"
           assert_equal "http://assethost.com", CloudfrontAssetHost.asset_host(source, request)
         end
 
         should "support gzip for IE" do
-          request = stub(:headers => {'User-Agent' => 'Mozilla/4.0 (compatible; MSIE 8.0)', 'Accept-Encoding' => 'gzip, compress'})
+          request = stub(:headers => {'User-Agent' => 'Mozilla/4.0 (compatible; MSIE 8.0)', 'Accept-Encoding' => 'gzip, compress'}, :ssl? => false)
           assert_equal "http://assethost.com/gz", CloudfrontAssetHost.asset_host(@source, request)
         end
 
         should "support gzip for modern browsers" do
-          request = stub(:headers => {'User-Agent' => 'Mozilla/5.0', 'Accept-Encoding' => 'gzip, compress'})
+          request = stub(:headers => {'User-Agent' => 'Mozilla/5.0', 'Accept-Encoding' => 'gzip, compress'}, :ssl? => false)
           assert_equal "http://assethost.com/gz", CloudfrontAssetHost.asset_host(@source, request)
         end
 
         should "support not support gzip for Netscape 4" do
-          request = stub(:headers => {'User-Agent' => 'Mozilla/4.0', 'Accept-Encoding' => 'gzip, compress'})
+          request = stub(:headers => {'User-Agent' => 'Mozilla/4.0', 'Accept-Encoding' => 'gzip, compress'}, :ssl? => false)
           assert_equal "http://assethost.com", CloudfrontAssetHost.asset_host(@source, request)
         end
 
         should "require gzip in accept-encoding" do
-          request = stub(:headers => {'User-Agent' => 'Mozilla/5.0'})
+          request = stub(:headers => {'User-Agent' => 'Mozilla/5.0'}, :ssl? => false)
           assert_equal "http://assethost.com", CloudfrontAssetHost.asset_host(@source, request)
         end
 
+        should "use https on secure request" do
+          request = stub(:headers => {'User-Agent' => 'Mozilla/5.0'}, :ssl? => true)
+          assert_equal "https://assethost.com", CloudfrontAssetHost.asset_host(@source, request)
+          CloudfrontAssetHost.cname = nil
+          assert_equal "https://bucketname.s3.amazonaws.com", CloudfrontAssetHost.asset_host(@source, request)
+        end
       end
 
     end

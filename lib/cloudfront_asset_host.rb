@@ -81,10 +81,10 @@ module CloudfrontAssetHost
           host = cname.call(source, request)
         else
           host = (cname =~ /%d/) ? cname % (source.hash % 4) : cname.to_s
-          host = "http://#{host}"
+          host = "#{protocol(request)}://#{host}"
         end
       else
-        host = "http://#{self.bucket_host}"
+        host = "#{protocol(request)}://#{self.bucket_host}"
       end
 
       if source && request && CloudfrontAssetHost.gzip
@@ -143,6 +143,14 @@ module CloudfrontAssetHost
     end
 
   private
+
+    def protocol(request)
+      if request.try(:ssl?) === true
+        "https"
+      else
+        "http"
+      end
+    end
 
     def properly_configured?
       raise "You'll need to specify a bucket" if bucket.blank?
