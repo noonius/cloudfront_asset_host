@@ -81,6 +81,9 @@ module CloudfrontAssetHost
           host = cname.call(source, request)
         else
           host = (cname =~ /%d/) ? cname % (source.hash % 4) : cname.to_s
+
+          # Use relative URLs in CSS when cname is static
+          return "" if request === false && host == cname.to_s
           host = "#{protocol(request)}://#{host}"
         end
       else
